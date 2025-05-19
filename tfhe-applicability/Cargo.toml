@@ -1,0 +1,15 @@
+[package]
+name = "tfhe-applicability"
+version = "0.1.0"
+edition = "2021"
+description = "Examples and applications using TFHE-rs"
+rust-version.workspace = true
+
+[dependencies]
+tfhe = { workspace = true }
+anyhow = { workspace = true }
+rand = { workspace = true }
+
+[[example]]
+name = "fibonacci"
+path = "examples/fibonacci.rs" 

@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = [
+    "tfhe-applicability",
+]
+
+[workspace.package]
+rust-version = "1.84"
+
+[workspace.dependencies]
+tfhe = { version = "1.1.0", features = ["boolean", "shortint", "integer"] }
+anyhow = "1.0"
+rand = "0.8" 
