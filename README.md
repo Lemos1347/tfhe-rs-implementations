@@ -1,8 +1,13 @@
 # 🔒 TFHE-rs Examples and Applications
 
-![TFHE](https://img.shields.io/badge/Encryption-Fully%20Homomorphic-blue)
-![Rust](https://img.shields.io/badge/Language-Rust-orange)
-![License](https://img.shields.io/badge/License-Apache%202.0-green)
+![TFHE](https://img.shields.io/badge/🔐%20Encryption-Fully%20Homomorphic-blue)
+![Rust](https://img.shields.io/badge/🦀%20Language-Rust-orange)
+![License](https://img.shields.io/badge/⚖️%20License-Apache%202.0-green)
+
+![Rust Version](https://img.shields.io/badge/🦀%20Rust-1.86.0-orange)
+![TFHE-rs](https://img.shields.io/badge/🔒%20TFHE--rs-1.1.0-blue)
+![Nix](https://img.shields.io/badge/❄️%20Nix-2.24-blue)
+![Docker](https://img.shields.io/badge/🐳%20Docker-27.4.0-blue)
 
 This repository contains examples and applications demonstrating the power of Fully Homomorphic Encryption (FHE) using the [TFHE-rs](https://github.com/zama-ai/tfhe-rs) library. The examples showcase how to perform computations on encrypted data without ever decrypting it.
 
@@ -379,6 +384,88 @@ just run-fibonacci-n-fast 20
 
 # Show help for available options
 just fibonacci-help
+```
+
+## 🐳 Running with Docker
+
+>[!TIP]
+>For the easiest way to get started without setting up the development environment, use our Docker CLI!
+
+We provide a pre-built Docker environment that includes all the TFHE-rs examples ready to run. This is perfect for:
+- Quick testing without installing Rust or Nix
+- Running on systems where setting up the development environment is challenging
+- Demonstrating FHE capabilities in isolated environments
+
+### Quick Start with Docker
+
+```bash
+# Build and run the TFHE-rs CLI
+make cli
+```
+
+This command will:
+1. Check if the Docker image exists
+2. Build it if needed (first time only)
+3. Drop you into an interactive CLI environment
+
+### Available Commands in Docker
+
+Once inside the Docker environment, you can use the `tfhe-cli` command:
+
+```bash
+# Show help and available commands
+tfhe-cli help
+
+# Run Fibonacci with default settings (10 numbers)
+tfhe-cli fibonacci
+
+# Run Fibonacci with a specific count
+tfhe-cli fibonacci 15
+
+# Run Fibonacci in fast mode (lower security, faster computation)
+tfhe-cli fibonacci-fast 5
+```
+
+### Example Docker Session
+
+```bash
+$ make cli
+Building TFHE-rs CLI Docker image...
+Starting TFHE-rs CLI environment (use 'exit' to leave)...
+
+tfhe-cli:~$ tfhe-cli fibonacci 5
+Computing 5 Fibonacci numbers using Fully Homomorphic Encryption...
+This may take several minutes due to the cryptographic operations.
+
+🔒 TFHE-rs Fibonacci Example
+Key generation: 543.2ms
+Encrypting initial values: 2.1ms
+Computing Fibonacci sequence...
+  F(0) = 0 (computed in 187.3ms)
+  F(1) = 1 (computed in 189.1ms)
+  F(2) = 1 (computed in 191.7ms)
+  F(3) = 2 (computed in 186.9ms)
+  F(4) = 3 (computed in 188.5ms)
+Decryption: 0.3ms
+
+✅ Successfully computed 5 Fibonacci numbers using FHE!
+
+tfhe-cli:~$ exit
+```
+
+### Manual Docker Commands
+
+If you prefer to run Docker commands manually:
+
+```bash
+# Build the image
+docker build -f build/Dockerfile.cli -t tfhe-rs-cli .
+
+# Run the CLI environment
+docker run -it --rm tfhe-rs-cli
+
+# Run a specific command directly
+docker run --rm tfhe-rs-cli tfhe-cli fibonacci 8
 ```
 
 ## 📝 Performance Metrics

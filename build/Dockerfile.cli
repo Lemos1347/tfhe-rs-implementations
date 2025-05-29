@@ -1,0 +1,101 @@
+# Multi-stage build for TFHE-rs CLI
+FROM rust:1.86-slim AS builder
+
+# Install system dependencies for building
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory
+WORKDIR /workspace
+
+# Copy the workspace files
+COPY Cargo.toml Cargo.lock ./
+COPY tfhe-applicability/ ./tfhe-applicability/
+
+# Build the release binary and examples
+RUN cargo build --release --workspace --examples
+
+# Runtime stage
+FROM debian:bookworm-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user
+RUN useradd -m -s /bin/bash tfhe-user
+
+# Set working directory
+WORKDIR /home/tfhe-user
+
+# Copy the built binaries and examples
+COPY --from=builder /workspace/target/release/examples/fibonacci ./bin/fibonacci
+COPY --from=builder /workspace/tfhe-applicability/examples/ ./examples/
+
+# Create CLI wrapper script
+RUN mkdir -p ./bin && \
+    echo '#!/bin/bash' > ./bin/tfhe-cli && \
+    echo '' >> ./bin/tfhe-cli && \
+    echo 'show_help() {' >> ./bin/tfhe-cli && \
+    echo '    echo "TFHE-rs CLI - Fully Homomorphic Encryption Examples"' >> ./bin/tfhe-cli && \
+    echo '    echo ""' >> ./bin/tfhe-cli && \
+    echo '    echo "Available commands:"' >> ./bin/tfhe-cli && \
+    echo '    echo "  fibonacci [n]     - Run Fibonacci sequence computation (default n=10)"' >> ./bin/tfhe-cli && \
+    echo '    echo "  fibonacci-fast [n] - Run Fibonacci in fast mode (lower security)"' >> ./bin/tfhe-cli && \
+    echo '    echo "  help              - Show this help message"' >> ./bin/tfhe-cli && \
+    echo '    echo ""' >> ./bin/tfhe-cli && \
+    echo '    echo "Examples:"' >> ./bin/tfhe-cli && \
+    echo '    echo "  tfhe-cli fibonacci 15      # Compute 15 Fibonacci numbers"' >> ./bin/tfhe-cli && \
+    echo '    echo "  tfhe-cli fibonacci-fast 5  # Compute 5 numbers in fast mode"' >> ./bin/tfhe-cli && \
+    echo '    echo ""' >> ./bin/tfhe-cli && \
+    echo '    echo "Source code is available in ./examples/"' >> ./bin/tfhe-cli && \
+    echo '}' >> ./bin/tfhe-cli && \
+    echo '' >> ./bin/tfhe-cli && \
+    echo 'case "$1" in' >> ./bin/tfhe-cli && \
+    echo '    "fibonacci")' >> ./bin/tfhe-cli && \
+    echo '        n=${2:-10}' >> ./bin/tfhe-cli && \
+    echo '        echo "Computing $n Fibonacci numbers using Fully Homomorphic Encryption..."' >> ./bin/tfhe-cli && \
+    echo '        echo "This may take several minutes due to the cryptographic operations."' >> ./bin/tfhe-cli && \
+    echo '        echo ""' >> ./bin/tfhe-cli && \
+    echo '        ./bin/fibonacci $n' >> ./bin/tfhe-cli && \
+    echo '        ;;' >> ./bin/tfhe-cli && \
+    echo '    "fibonacci-fast")' >> ./bin/tfhe-cli && \
+    echo '        n=${2:-10}' >> ./bin/tfhe-cli && \
+    echo '        echo "Computing $n Fibonacci numbers using FHE (fast mode)..."' >> ./bin/tfhe-cli && \
+    echo '        echo "This uses lower security parameters for faster computation."' >> ./bin/tfhe-cli && \
+    echo '        echo ""' >> ./bin/tfhe-cli && \
+    echo '        ./bin/fibonacci $n --fast' >> ./bin/tfhe-cli && \
+    echo '        ;;' >> ./bin/tfhe-cli && \
+    echo '    "help"|"-h"|"--help"|"")' >> ./bin/tfhe-cli && \
+    echo '        show_help' >> ./bin/tfhe-cli && \
+    echo '        ;;' >> ./bin/tfhe-cli && \
+    echo '    *)' >> ./bin/tfhe-cli && \
+    echo '        echo "Unknown command: $1"' >> ./bin/tfhe-cli && \
+    echo '        echo "Run '\''tfhe-cli help'\'' for available commands"' >> ./bin/tfhe-cli && \
+    echo '        exit 1' >> ./bin/tfhe-cli && \
+    echo '        ;;' >> ./bin/tfhe-cli && \
+    echo 'esac' >> ./bin/tfhe-cli
+
+# Make the CLI script executable
+RUN chmod +x ./bin/tfhe-cli
+
+# Add bin directory to PATH
+ENV PATH="/home/tfhe-user/bin:$PATH"
+
+# Change ownership to tfhe-user
+RUN chown -R tfhe-user:tfhe-user /home/tfhe-user
+
+# Switch to non-root user
+USER tfhe-user
+
+# Set up bash prompt
+RUN echo 'export PS1="tfhe-cli:\w$ "' >> ~/.bashrc && \
+    echo 'echo "Welcome to TFHE-rs CLI Environment!"' >> ~/.bashrc && \
+    echo 'echo "Type '\''tfhe-cli help'\'' to see available commands"' >> ~/.bashrc && \
+    echo 'echo ""' >> ~/.bashrc
+
+# Default command drops into bash shell
+CMD ["/bin/bash"] 
