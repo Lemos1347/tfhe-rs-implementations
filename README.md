@@ -35,6 +35,25 @@ With FHE:
 - The party performing the computation never sees the actual data
 - The results are only accessible to those with the decryption key
 
+## 🎬 Demo
+
+This demo showcases:
+- 🔑 **Key Generation**: Creating encryption and server keys
+- 🔒 **Data Encryption**: Securing initial Fibonacci values (0, 1)
+- ⚡ **Homomorphic Computation**: Adding encrypted numbers without decryption
+- 📊 **Performance Metrics**: Real-time timing of each operation
+- ✅ **Result Verification**: Decrypting to verify correctness
+
+### What You'll See
+
+The video demonstrates the complete FHE workflow:
+
+1. **Docker Environment Setup** - One command to get started (`make cli`)
+2. **Interactive CLI** - User-friendly commands (`tfhe-cli fibonacci 10`)
+3. **Live Computation** - Watch encrypted additions happen in real-time
+4. **Performance Insights** - See the actual time each cryptographic operation takes
+5. **Mathematical Verification** - Confirm the encrypted computation produces correct results
+
 ## 🚀 Getting Started
 
 ### Prerequisites
