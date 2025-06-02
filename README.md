@@ -36,7 +36,8 @@ With FHE:
 - The results are only accessible to those with the decryption key
 
 ## 🎬 Demo
-https://github.com/user-attachments/assets/5815c260-d20f-408f-9704-57961c23abce
+
+https://github.com/user-attachments/assets/01448711-c34e-4667-b087-cd4016560607
 
 This demo showcases:
 - 🔑 **Key Generation**: Creating encryption and server keys
